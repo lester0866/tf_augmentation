@@ -13,7 +13,7 @@ It also supports visualizing the augmented output, saving it as mp4 file.
 | Random Rotation | No |
 | Random Gaussian Noise | Yes - gaussian mean |
 | Random Left_Right Flipping | No |
-| User-specified Resizing| Yes |
+| User-specified Resizing| Yes - resize size |
 
 ## How to run
   - **Environment Configuration**
