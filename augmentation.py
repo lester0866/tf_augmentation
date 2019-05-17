@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import tensorflow as tf
-import imageio
 import pickle
 
 
@@ -15,6 +14,7 @@ def main():
     parser.add_argument('--crop_size', type=str, default='160x160')
     parser.add_argument('--resize', type=str, default='16x16')
     parser.add_argument('--demo', type=bool, default=False)
+    parser.add_argument('--mean', type=float, default=50.0)
     args = parser.parse_args()
     # getting video in numpy and its shape
     np_video, shape = extract_frame(args)
@@ -71,10 +71,10 @@ def augment(np_video, this_shape, args):
                     aug_video = crop(inp_var, shape, args)
                 if this_command == 'rand_rot':
                     aug_video = rotate(inp_var, shape)
-                if this_command == 'rand_resize':
+                if this_command == 'resize':
                     aug_video = resize(inp_var, args)
                 if this_command == 'rand_noise':
-                    aug_video = gaussian_noise(inp_var, shape)
+                    aug_video = gaussian_noise(inp_var, shape, args)
                 if this_command == 'rand_flip':
                     aug_video = flip(inp_var, shape)
                 feed_dict = {inp_var: my_video}
@@ -83,6 +83,7 @@ def augment(np_video, this_shape, args):
                 shape = (augmented_video.shape[0], augmented_video.shape[1], augmented_video.shape[2])
         # Only if args.demo is True, we output the video file for checking purposes
         if args.demo:
+            import imageio
             imageio.mimwrite(f'aug{counter}.mp4', augmented_video, fps=30, macro_block_size=1)
         # Otherwise, this 4D numpy array is appended to the list
         else:
@@ -118,10 +119,10 @@ def rotate(video, shape):
     return rotated_video
 
 
-def gaussian_noise(video, shape):
+def gaussian_noise(video, shape, args):
     N, H, W = shape
     # sampling noise from normal distribution
-    noise = tf.random_normal(shape=[N, H, W, 3], mean=50.0, stddev=50 / 255, dtype=tf.float32)
+    noise = tf.random_normal(shape=[N, H, W, 3], mean=args.mean, stddev=50 / 255, dtype=tf.float32)
     # adding noise to our video
     noise_video = tf.cast(video, dtype=tf.float32) + noise
 
